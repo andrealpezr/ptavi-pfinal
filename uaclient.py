@@ -34,4 +34,14 @@ class UAclienthandler(ContentHandler):
         """Devuelve los datos del xml del cliente."""
         return self.config
 
-    
+    def log(message, fich_log):
+        hora = time.strftime('%Y%m%d%H%M%S', time.gtime(time.time()))
+        fichero = open(fich_log, 'a')
+        message = message.replace('\r\n', ' ')
+        fichero.write(hora + '' + message + '\r\n')
+        fichero.close()
+
+
+if __name__ == "__main__":
+
+ 
