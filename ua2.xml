@@ -3,7 +3,7 @@
   <account username="atletico@ptavi.es" passwd="notable"/>
   <uaserver ip="127.0.0.1" puerto="6012"/>
   <rtpaudio puerto="23033"/>
-  <regproxy ip="127.0.0.1" puerto="6543"/>
-  <log path="./log_ua2.txt"/>
-  <audio path="./cancion.mp3"/>
+  <regproxy ip="127.0.0.1" puerto="6002"/>
+  <log path="log_ua2.txt"/>
+  <audio path="cancion.mp3"/>
 </config>
