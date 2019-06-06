@@ -18,7 +18,7 @@
 ]>
 <config>
     <account username="atletico_club@ptavi.es" passwd="notable" />
-    <uaserver ip="127.0.0.2" puerto="6012" />
+    <uaserver ip="127.0.0.3" puerto="6012" />
     <rtpaudio puerto="23033" />
     <regproxy ip="127.0.0.1" puerto="6002" />
     <log path="log_ua2.txt" />
