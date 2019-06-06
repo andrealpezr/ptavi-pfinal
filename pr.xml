@@ -1,0 +1,21 @@
+<?xml version= "1.0" encoding= "UTF-8" ?>
+<!DOCTYPE config [
+    <!ELEMENT config (server, database, log)>
+    <!ELEMENT server EMPTY>
+    <!ATTLIST server name CDATA #IMPLIED>
+    <!ATTLIST server ip CDATA #IMPLIED>
+    <!ATTLIST server puerto CDATA #REQUIRED>
+    <!ELEMENT database EMPTY>
+    <!ATTLIST database path CDATA #REQUIRED>
+    <!ATTLIST database passwdpath CDATA #IMPLIED>
+    <!ELEMENT log EMPTY>
+    <!ATTLIST log path CDATA #REQUIRED>
+]>
+<config>
+    <server name="My_Proxy" /> 
+    <server ip = "127.0.0.1"/>
+    <server puerto="5445" />
+    <database path="base_datos" />
+    <database />
+    <log path="log_prox" />
+</config>
