@@ -34,14 +34,30 @@ class UAclienthandler(ContentHandler):
         """Devuelve los datos del xml del cliente."""
         return self.config
 
-    def log(message, fich_log):
-        hora = time.strftime('%Y%m%d%H%M%S', time.gtime(time.time()))
-        fichero = open(fich_log, 'a')
-        message = message.replace('\r\n', ' ')
-        fichero.write(hora + '' + message + '\r\n')
-        fichero.close()
+    def log(self, accion, linea, fich_log):
+        fich = open(fich_log, "a")
+        now = time.gmtime(time.time())  
+        hora = time.strftime('%Y%m%d%H%M%S', now)
+        line = linea.split('\r\n')
+        texto = ' '.join(line)
+
+        fich.write(hora + "\t" + accion + "\t" + texto + "\r\n")
+
 
 
 if __name__ == "__main__":
 
+    try:
+        CONFIG_XML = sys.argv[1]
+        metodo = sys.argv[2]
+        METODO = metodo.upper()
+    except(IndexError, ValueError):
+        sys.exit('Usage: python3 uaclient.py config method option')
  
+    # Creamos socket para parsear el XML
+    parser = make_parser()
+    cHandler = UAclienthandler()
+    parser.setContentHandler(cHandler)
+    parser.parse(open(CONFIG_XML))
+    lista_etiq = cHandler.get_tags()
+
