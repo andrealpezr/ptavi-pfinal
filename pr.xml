@@ -2,20 +2,10 @@
 <!DOCTYPE config [
     <!ELEMENT config (server, database, log)>
     <!ELEMENT server EMPTY>
-    <!ATTLIST server name CDATA #IMPLIED>
-    <!ATTLIST server ip CDATA #IMPLIED>
-    <!ATTLIST server puerto CDATA #REQUIRED>
-    <!ELEMENT database EMPTY>
-    <!ATTLIST database path CDATA #REQUIRED>
-    <!ATTLIST database passwdpath CDATA #IMPLIED>
-    <!ELEMENT log EMPTY>
     <!ATTLIST log path CDATA #REQUIRED>
 ]>
 <config>
-    <server name="My_Proxy" /> 
-    <server ip = "127.0.0.1"/>
-    <server puerto="5445" />
-    <database path="base_datos" />
-    <database />
+    <server name="My_Proxy" ip = "127.0.0.1" puerto="6002"/> 
+    <database path="base_datos.txt" passwdpath = 'esdificil' />
     <log path="log_prox" />
 </config>
