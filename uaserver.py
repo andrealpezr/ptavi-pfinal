@@ -44,15 +44,38 @@ class EchoHandler(socketserver.DatagramRequestHandler):
     def handle(self):
         """Metodo para establecer comunicación SIP."""
         while 1:
-            # Leyendo línea a línea lo que nos envía el cliente
-            line = self.rfile.read()
-
+            # Lee línea a línea lo que nos envía el cliente
+            read_line = self.rfile.read()
             # Si no hay más líneas salimos del bucle infinito
-            if not line:
+            if not read_line:
                 break
+                # Evaluación de los parámetros que nos envía el proxy
+            print("El proxy nos manda: " + read_line.decode('utf-8'))
+            lines = read_line.decode('utf-8')
+            print(lines.split())
+            METODO = lines.split(' ')[0]
+            if METODO == "INVITE":
+                ok = "SIP/2.0 200 OK" + '\r\n' + '\r\n'
+                TO_SEND = ok
+                TO_SEND += "Content-Type: application/sdp\r\n\r\n"
+                TO_SEND += "v=0\r\n" + "o=" + USERNAME + ' '
+                TO_SEND += UASERV_IP + "\r\n" + "s=misession\r\n"
+                TO_SEND += "t=0\r\n" + "m=audio " + RTP_PORT
+                TO_SEND += " RTP\r\n\r\n"
+                self.wfile.write(b"SIP/2.0 100 Trying" + b"\r\n"
+                                 b"SIP/2.0 180 Ring" + b"\r\n")
+                self.wfile.write(bytes(TO_SEND, 'utf-8'))
+            elif METODO == "ACK":
+                 aEjecutar = "./mp32rtp -i " + UASERV_IP + " -p 23032 < "
+                 aEjecutar += AUDIO_PATH
+                 print("Vamos a ejecutar", aEjecutar)
+                 os.system(aEjecutar)
+            elif METODO == "BYE":
+                 self.wfile.write(b"SIP/2.0 200 OK" + b"\r\n")
+            elif METODO != "REGISTER" or "INVITE" or "ACK":
+                self.wfile.write(b"SIP/2.0 405 Method Not Allowed" + b"\r\n")
             else:
-                # Evaluación de los parámetros que nos envía el cliente
-                print ("Recibido:\n" + line)
+                self.wfile.write(b"SIP/2.0 400 Bad Request" + b"\r\n")
 
 
 if __name__ == "__main__":
