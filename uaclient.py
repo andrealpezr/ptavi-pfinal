@@ -31,7 +31,7 @@ class UAclienthandler(ContentHandler):
             Dict = {}
             for atrib in self.dicc_etiq[element]:
                 Dict[atrib] = attrs.get(atrib, "")
-                self.Lista.append([element, Dict])
+            self.Lista.append([element, Dict])
 
     def get_tags(self):
         """Devuelve los datos del xml del cliente."""
@@ -57,13 +57,13 @@ if __name__ == "__main__":
     # Damos valores a las variables del XML
     USERNAME = XML_list[0][1]['username']  # Es el nombre SIP
     USER_PASS = XML_list[0][1]['passwd']  # Es la contraseña SIP
-    UASERV_IP = XML_list[2][1]['ip']  # Es el ip del servidor
-    UASERV_PORT = XML_list[2][1]['puerto']  # Es el servidor del servidor
-    RTP_PORT = XML_list[4][1]['puerto']  # Es el puerto del RTP
-    PROXY_IP = XML_list[6][1]['ip']  # Es la IP del PROXY
-    PROX_PORT = XML_list[6][1]['puerto']  # Es el puerto del PROXY
-    LOG_PATH = XML_list[7][1]['path']  # Es el fichero log
-    AUDIO_PATH = XML_list[8][1]['path']  # Es el audio log
+    UASERV_IP = XML_list[1][1]['ip']  # Es el ip del servidor
+    UASERV_PORT = XML_list[1][1]['puerto']  # Es el servidor del servidor
+    RTP_PORT = XML_list[2][1]['puerto']  # Es el puerto del RTP
+    PROXY_IP = XML_list[3][1]['ip']  # Es la IP del PROXY
+    PROX_PORT = XML_list[3][1]['puerto']  # Es el puerto del PROXY
+    LOG_PATH = XML_list[4][1]['path']  # Es el fichero log
+    AUDIO_PATH = XML_list[5][1]['path']  # Es el audio log
 
     # Creamos el socket para conectarlo al proxy
     my_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
