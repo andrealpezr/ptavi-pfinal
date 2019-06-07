@@ -9,7 +9,7 @@ import os
 import hashlib
 from xml.sax import make_parser
 from xml.sax.handler import ContentHandler
-
+import time
 
 class UAclienthandler(ContentHandler):
     """Clase que extrae e imprime el xml del cliente."""
@@ -36,6 +36,18 @@ class UAclienthandler(ContentHandler):
     def get_tags(self):
         """Devuelve los datos del xml del cliente."""
         return self.Lista
+
+class Log():
+    """Añade contenido al fichero Log."""
+
+    def appendlog(mensaje, log_path):
+        """definos la funcion."""
+        now = time.strftime('%Y%m%d%H%M%S', time.gmtime(time.time()))
+        # Utiliz "a" para no sobreescribir el fichero
+        fich_log = open(log_path, 'a')
+        mensaje = mensaje.replace('\r\n', ' ')
+        fich_log.write(now + ' ' + mensaje + '\r\n')
+        fich_log.close()
 
 
 if __name__ == "__main__":
@@ -65,6 +77,10 @@ if __name__ == "__main__":
     LOG_PATH = XML_list[4][1]['path']  # Es el fichero log
     AUDIO_PATH = XML_list[5][1]['path']  # Es el audio log
 
+    if UASERV_IP == "":
+        UASERV_IP = '127.0.0.1'
+    if PROXY_IP == "":
+        PROXY_IP = '127.0.0.1'
     # Creamos el socket para conectarlo al proxy
     my_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     my_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -74,15 +90,6 @@ if __name__ == "__main__":
     Digest_Resp = h.hexdigest()
 
     if METODO == "REGISTER":
-        TO_SEND = METODO + ' sip:' + USERNAME + ":" + UASERV_PORT
-        TO_SEND += ' SIP/2.0\r\nExpires: ' + OPCION + '\r\n'
-        print("Enviando:", TO_SEND)
-        my_socket.send(bytes(TO_SEND, 'utf-8') + b'\r\n')
-        DATA = my_socket.recv(1024)
-        print('Recibido --', DATA.decode('utf-8'))
-
-        list_rec = DATA.decode('utf-8').split()
-        if list_rec[1] == "401":
             TO_SEND = METODO + " sip:" + USERNAME + ":" + UASERV_PORT
             TO_SEND += " " + "SIP/2.0\r\n" + "Expires: " + OPCION + " \r\n"
             TO_SEND += 'Authorizacion: Digest response= ' + Digest_Resp
@@ -90,13 +97,13 @@ if __name__ == "__main__":
             print("Enviando:", TO_SEND)
             my_socket.send(bytes(TO_SEND, 'utf-8') + b'\r\n')
             datos = my_socket.recv(1024)
-        print('Recibido --', datos.decode('utf-8'))
+            print('Recibido --', datos.decode('utf-8'))
 
     elif METODO == "INVITE":
             TO_SEND = METODO + " sip:" + OPCION + ' ' + "SIP/2.0\r\n"
             TO_SEND += "Content-Type: application/sdp\r\n\r\n" + "v=0\r\n"
             TO_SEND += 'o' + USERNAME + ' ' + UASERV_IP + "\r\n"
-            TO_SEND += "s=misession\r\n" + "t=0\r\n" + "m=audio " + RTP_PORT
+            TO_SEND += "s=conectate\r\n" + "t=0\r\n" + "m=audio " + RTP_PORT
             TO_SEND += " RTP\r\n\r\n"
             print("Enviando:", TO_SEND)
             my_socket.send(bytes(TO_SEND, 'utf-8') + b'\r\n')
@@ -121,5 +128,5 @@ if __name__ == "__main__":
             DATA = my_socket.recv(1024)
             print('Recibido --', DATA.decode('utf-8'))
     else:
-        sys.exit("Usage: python uaclient.py config method option")
+        sys.exit("Usage: python3 uaclient.py config method option")
 print("Terminando socket...")
