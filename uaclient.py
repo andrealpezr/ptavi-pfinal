@@ -1,21 +1,21 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
-"""Hago el cliente para una comunicación SIP."""
+
+"""Programa del cliente para una comunicacion SIP."""
 
 import socket
 import sys
 import os
-import time
 import hashlib
 from xml.sax import make_parser
 from xml.sax.handler import ContentHandler
 
 
 class UAclienthandler(ContentHandler):
-    """Clase que extrae e imprime el xml del cliente """
+    """Clase que extrae e imprime el xml del cliente."""
 
     def __init__(self):
-        """Inicializamos las variabes."""
+        """Inicializo las variabes."""
         self.Lista = []
 
     def startElement(self, element, attrs):
@@ -46,14 +46,14 @@ if __name__ == "__main__":
         OPCION = sys.argv[3]
     except(IndexError, ValueError):
         sys.exit('Usage: python3 uaclient.py config method option')
- 
+
     # Creamos socket para parsear el XML
     parser = make_parser()
     cHandler = UAclienthandler()
     parser.setContentHandler(cHandler)
     parser.parse(open(CONFIG_XML))
     XML_list = cHandler.get_tags()
-    
+
     # Damos valores a las variables del XML
     USERNAME = XML_list[0][1]['username']  # Es el nombre SIP
     USER_PASS = XML_list[0][1]['passwd']  # Es la contraseña SIP
@@ -80,7 +80,7 @@ if __name__ == "__main__":
         my_socket.send(bytes(TO_SEND, 'utf-8') + b'\r\n')
         DATA = my_socket.recv(1024)
         print('Recibido --', DATA.decode('utf-8'))
-       
+
         list_rec = DATA.decode('utf-8').split()
         if list_rec[1] == "401":
             TO_SEND = METODO + " sip:" + USERNAME + ":" + UASERV_PORT
@@ -94,17 +94,17 @@ if __name__ == "__main__":
 
     elif METODO == "INVITE":
             TO_SEND = METODO + " sip:" + OPCION + ' ' + "SIP/2.0\r\n"
-            TO_SEND += "Content-Type: application/sdp\r\n\r\n" + "v=0\r\n" + "o="
-            TO_SEND += 'o' + USERNAME + ' ' + UASERV_IP + "\r\n" 
-            TO_SEND += "s=misession\r\n" + "t=0\r\n" + "m=audio " + RTP_PORT 
+            TO_SEND += "Content-Type: application/sdp\r\n\r\n" + "v=0\r\n"
+            TO_SEND += 'o' + USERNAME + ' ' + UASERV_IP + "\r\n"
+            TO_SEND += "s=misession\r\n" + "t=0\r\n" + "m=audio " + RTP_PORT
             TO_SEND += " RTP\r\n\r\n"
             print("Enviando:", TO_SEND)
             my_socket.send(bytes(TO_SEND, 'utf-8') + b'\r\n')
             DATA = my_socket.recv(1024)
             print('Recibido --', DATA.decode('utf-8'))
             list_rec = DATA.decode('utf-8').split()
-            if list_rec[1] == "100" and ((list_rec[4] == "180") and 
-                                          (list_rec[7] == "200")):
+            if list_rec[1] == "100" and ((list_rec[4] == "180") and
+                                         (list_rec[7] == "200")):
                 METODO = "ACK"
                 TO_SEND = METODO + " sip:" + USERNAME + " SIP/2.0\r\n"
                 print("Enviando", TO_SEND)
