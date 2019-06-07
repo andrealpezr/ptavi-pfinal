@@ -38,15 +38,11 @@ class UAServerhandler(ContentHandler):
         """Devuelve los datos del xml del cliente."""
         return self.Lista_server
 
+
 class EchoHandler(socketserver.DatagramRequestHandler):
     """Echo server class."""
     def handle(self):
-        """Metodo para recibir y establecer comunicación SIP."""
-        # Escribe dirección y puerto del cliente (de tupla client_address)
-        client_ip = str(self.client_address[0])
-        client_port = str(self.client_address[1])
-        print("IP cliente: " + client_ip + "| Puerto cliente: " + client_port)
-
+        """Metodo para establecer comunicación SIP."""
         while 1:
             # Leyendo línea a línea lo que nos envía el cliente
             line = self.rfile.read()
@@ -70,7 +66,32 @@ if __name__ == "__main__":
 
     # Creamos socket para parsear el XML
     parser = make_parser()
+    cHandler = UAServerhandler()
+    parser.setContentHandler(cHandler)
+    parser.parse(open(CONFIG_XML))
+    XML_serv = cHandler.get_tags()
+
+    # Doy valores a las variables del XML
+    USERNAME = XML_serv[0][1]['username']  # Es el nombre SIP
+    USER_PASS = XML_serv[0][1]['passwd']  # Es la contraseña SIP
+    UASERV_IP = XML_serv[2][1]['ip']  # Es el ip del servidor
+    UASERV_PORT = XML_serv[2][1]['puerto']  # Es el servidor del servidor
+    RTP_PORT = XML_serv[4][1]['puerto']  # Es el puerto del RTP
+    PROXY_IP = XML_serv[6][1]['ip']  # Es la IP del PROXY
+    PROX_PORT = XML_serv[6][1]['puerto']  # Es el puerto del PROXY
+    LOG_PATH = XML_serv[7][1]['path']  # Es el fichero log
+    AUDIO_PATH = XML_serv[8][1]['path']  # Es el audio log
+
+
+    # Creo socket para parsear el XML
+    parser = make_parser()
     Serv_Handler = UAServerhandler()
     parser.setContentHandler(Serv_Handler)
     parser.parse(open(CONFIG_XML))
     XML_Server = Serv_Handler.get_tags()
+
+    # Conecto socket al servidor
+    my_socket_server = socketserver.UDPServer((UASERV_IP, int(UASERV_PORT)), 
+                                              UAServerhandler)
+    print("Listening")
+    my_socket_server.serve_forever()
