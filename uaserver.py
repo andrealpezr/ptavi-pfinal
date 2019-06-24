@@ -9,7 +9,6 @@ import socketserver
 import time
 from xml.sax import make_parser
 from xml.sax.handler import ContentHandler
-from uaclient import Wlog
 
 
 class XMLServer(ContentHandler):
@@ -48,73 +47,81 @@ class EchoHandler(socketserver.DatagramRequestHandler):
             # Lee linea a linea lo que recibe del cliente
             line = self.rfile.read()
             lines = line.decode('utf-8')
-            print('Recibido del cliente--' + lines)
-            # Añado lo que recibo en el fichero log 
-            event = "Recibo de " + PROXY_IP + ':' + PROX_PORT + ':' + lines
-            tiempo = time.time()
-            Wlog(log_path, tiempo, event)
-            lin = lines.split(' ')            
-            METOD = lin[0]
+            print('Recibo del proxy--' + lines)
+            # Si hay linea en blanco sale del bucle
+            if not lines:
+                break
+            mensaje = lines.split('\r\n')  
+            linea = mensaje[0].split()
+            METOD = linea[0]
             if METOD == 'INVITE' or METOD == 'invite':
-               to_send = ('SIP/2.0 100 Trying\r\n\r\n' +
-                          'SIP/2.0 180 Ringing\r\n\r\n' +
-                          'SIP/2.0 200 OK\r\n\r\n')
-                   # SDP con el 200 ok
-               sdp = ("Content-Type: application/sdp\r\n\r\n" +
-                      'v=0\r\n' + "o=" + USERNAME + ' ' + UASERV_IP +
-                      '\r\n' + 's=lasesion\r\n' + 'm=audio ' + 
-                      str(RTP_PORT) + ' RTP\r\n\r\n')
-               mensaje = to_send + sdp
-               self.wfile.write(bytes(mensaje, 'utf-8'))
-               event = ("Recibo de " + PROXY_IP + ':' + PROX_PORT + ':' + 
-                        mensaje)
-               tiempo = time.time()
-               Wlog(log_path, tiempo, event)               
-
+               # Lo envio tras recibir el INVITE
+               self.wfile.write(b'SIP/2.0 100 Trying' + b'\r\n\r\n')
+               self.wfile.write(b'SIP/2.0 180 Ringing' + b'\r\n\r\n')
+               ok = 'SIP/2.0 200 OK\r\n\r\n'
+               sdp = 'Content-Type: application/sdp \r\n\r\n' + 'v=0 \r\n'
+               sdp += "o=" + USERNAME + " " + UASERV_IP + '\r\n'
+               sdp += 's=lasesion \r\n' + 't=0\r\n' + 'm=audio '
+               sdp += str(RTP_PORT) + ' RTP \r\n\r\n'
+               # Envio peticion
+               peticion = ok + sdp
+               self.wfile.write(bytes(peticion, 'utf-8'))
+               print('Envio al proxy:\r\n', peticion)
             elif METOD == 'ACK' or METOD == 'ack':
-                 aEjecutarVLC = 'cvlc rtp://@127.0.0.1:'
-                 aEjecutarVLC += RTP_PORT + '2> /dev/null '
-                 os.system(aEjecutarVLC)
-                 aEjecutar = './mp32rtp -i ' + UASERV_IP
-                 aEjecutar = aEjecutar + ' -p ' + RTP_PORT + '<' + AUDIO_PATH
-                 print("Vamos a ejecutar", aEjecutar)
-                 os.system(aEjecutar)
-                 print('La ejecucion ha terminado')
-            elif METOD == 'BYE' or METOD == 'BYE':
-                to_send = 'SIP/2.0 200 OK\r\n\r\n'
+                # Tras recibir el ack mando el rtp
+                print('He recibido el ACK, envio RTP')
+                aEjecutar = './mp32rtp -i ' + UASERV_IP + " -p "
+                aEjecutar +=  UASERV_PORT + ' < ' + AUDIO_PATH
+                print('Vamos a ejecutar', aEjecutar)
+                os.system(aEjecutar)
+                print('La ejecucion  RTP ha finalizado \r\n')
+                aEjecutar_cvlc = 'cvlc rtp://' + str(UASERV_IP) + ':'
+                aEjecutar_cvlc += str(UASERV_PORT) + ' 2> /dev/null'
+                print('Vamos a ejecutar = ', aEjecutar_cvlc)
+                os.system(aEjecutar_cvlc + '&')
+            # En caso de recibir un BYE
+            elif METOD == 'BYE' or METOD == 'bye':
+                bye = b'SIP/2.0 200 OK\r\n\r\n'
+                print('Mando al proxy:\r\n SIP/2.0 200 OK\r\n\r\n')
+                self.wfile.write(bye)
             else:
-                to_send = 'SIP/2.0 400 Bad Request\r\n\r\n'
+                 self.wfile.write(b'SIP/2.0 400 Bad Request\r\n\r\n')
 
-    
+
 if __name__ == "__main__":
-    if len(sys.argv) != 2:
-        sys.exit("Usage: python3 uaserver.py config")
+   
+    if len(sys.argv) == 2:
+        CONFIG = sys.argv[1]
 
-    CONFIG = sys.argv[1]
-    parser = make_parser()
-    Handler = XMLServer()
-    parser.setContentHandler(Handler)
-    parser.parse(open(CONFIG))
-    datos_XML = Handler.get_tags()
+        # Creo el socket para parsear el XML y trabajar con el
+        parser = make_parser()
+        Handler = XMLServer()
+        parser.setContentHandler(Handler)
+        parser.parse(open(CONFIG))
+        datos_XML = Handler.get_tags()
 
-    # Extraigo el fichero XML
-    USERNAME = datos_XML[0][1]['username']  # Es el nombre SIP
-    USER_PASS = datos_XML[0][1]['passwd']  # Es la contraseña SIP
-    UASERV_IP = datos_XML[1][1]['ip']  # Es el ip del servidor
-    UASERV_PORT = datos_XML[1][1]['puerto']  # Es el servidor del servidor
-    RTP_PORT = datos_XML[2][1]['puerto']  # Es el puerto del RTP
-    PROXY_IP = datos_XML[3][1]['ip']  # Es la IP del PROXY
-    PROX_PORT = datos_XML[3][1]['puerto']  # Es el puerto del PROXY
-    log_path = datos_XML[4][1]['path']  # Es el fichero log
-    AUDIO_PATH = datos_XML[5][1]['path']  # Es el audio log 
+        # Extraigo el fichero XML
+        USERNAME = datos_XML[0][1]['username']  # Es el nombre SIP
+        USER_PASS = datos_XML[0][1]['passwd']  # Es la contraseña SIP
+        UASERV_IP = datos_XML[1][1]['ip']  # Es el ip del servidor
+        UASERV_PORT = datos_XML[1][1]['puerto']  # Es el servidor del servidor
+        RTP_PORT = datos_XML[2][1]['puerto']  # Es el puerto del RTP
+        PROXY_IP = datos_XML[3][1]['ip']  # Es la IP del PROXY
+        PROX_PORT = datos_XML[3][1]['puerto']  # Es el puerto del PROXY
+        log_path = datos_XML[4][1]['path']  # Es el fichero log
+        AUDIO_PATH = datos_XML[5][1]['path']  # Es el audio log 
+        # Defino el log para poner escribir en el fichero
 
-    SERV = socketserver.UDPServer((UASERV_IP, int(UASERV_PORT)), EchoHandler)
-    print('Listening...\r\n')
-    try:
-        SERV.serve_forever()
-    except FileNotFoundError:
-            sys.exit('File not found!')
-    except IndexError:
-            sys.exit("Usage: python3 uaserver.py config")
-    except KeyboardInterrupt:
-            print("\r\nFinalizado el servidor")
+        SERV = socketserver.UDPServer((UASERV_IP, int(UASERV_PORT)),
+                                      EchoHandler)
+        print('Listening...\r\n')
+        try:
+            SERV.serve_forever()
+        except FileNotFoundError:
+                sys.exit('File not found!')
+        except IndexError:
+                sys.exit("Usage: python3 uaserver.py config")
+        except KeyboardInterrupt:
+                print("\r\nFinalizado el servidor")
+    else:
+        sys.exit('Usage: python3 uaserver.py config')
