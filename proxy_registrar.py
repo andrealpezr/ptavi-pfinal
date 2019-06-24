@@ -1,80 +1,196 @@
-#!/usr/bin/env python3
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
-"""Programa principal del proxy para comunicacion SIP."""
+"""Programa del proxy."""
 
 import socket
 import socketserver
 import sys
+import os
+import json
+import time
+
+
 from xml.sax import make_parser
 from xml.sax.handler import ContentHandler
-import time
-from datetime import date
-import os
 
 
-class UA_Proxy(ContentHandler):
-    """Clase que extrae e imprime el xml del cliente """
+class FicheroXML(ContentHandler):
+    """Creamos la clase."""
 
     def __init__(self):
-        """Inicializo las variabes."""
-        self.Lista_prox = []
+        """Inicalizo variables."""
+        self.config = []
 
-    def startElement(self, element, attrs):
-        """Crea las etiquetas y tributos del xml."""
-        self.dicc_etiq_prox = {'server': ['name', 'ip', 'puerto'],
-                               'database': ['path', 'passdpath'],
-                               'log': ['path']}
-        if element in self.dicc_etiq_prox:
-            Dict_prox = {}
-            for atrib in self.dicc_etiq_prox[element]:
-                Dict_prox[atrib] = attrs.get(atrib, "")
-            self.Lista_prox.append([element, Dict_prox])
+    def startElement(self, name, attrs):
+        """Se abre si tengo la etiqueta."""
+        if name == 'server':
+            USER = attrs.get('name', "")
+            self.config.append(USER)
+            IP = attrs.get('ip', "")
+            self.config.append(IP)
+            PORT = attrs.get('puerto', "")
+            self.config.append(PORT)
+
+        elif name == 'database':
+            DAT_PATH = attrs.get('path', "")
+            self.config.append(DAT_PATH)
+            CONTR = attrs.get('passwdpath', "")
+            self.config.append(CONTR)
+
+        elif name == 'log':
+            LOG_PATH = attrs.get('path', "")
+            self.config.append(LOG_PATH)
 
     def get_tags(self):
-        """Devuelve los datos del xml del cliente."""
-        return self.Lista_prox
+        """Imprime la lista."""
+        return self.config
 
-   
-class EchoHandler(socketserver.DatagramRequestHandler):
-    """Echo server class."""
+
+class SIPRegisterHandler(socketserver.DatagramRequestHandler):
+    """Poxy class."""
+
+    Dicc = {}
+    Dicc_password = {}
+
+    def ServidorRegistro(self):
+        fich_serv = open('passwords.txt', 'w')
+        for user in self.Dicc.keys():
+            us = self.Dicc[user][0]
+            ip = self.Dicc[user][1]
+            port = self.Dicc[user][2]
+            register = self.Dicc[user][3]
+            exp = self.Dicc[user][4]
+            fich_serv.write("USUARIOS QUE ESTAN REGISTRADOS" + '\r\n')
+            fich_serv.write(us + ' ' + ip + ' ' + port + ' '
+                            + str(register) + ' ' + str(exp) + ';')
+
+    def delete(self):
+        """Borra usuarios si expira el tiempo."""
+        conjunto = []
+        for contr in self.Dicc:
+            time_now = self.Dic[contr][-1]
+            time_strp = time.strptime(time_now, '%Y-%m-%d %H:%M:%S')
+            if time_strp <= time.gmtime(time.time()):
+                conjunto.append(contr)
+        for usuario in conjunto:
+            del self.Dicc[usuario]
+            print('Borrando', usuario)
 
     def handle(self):
-        """Metodo para establecer comunicacion SIP."""
+        """Segun los metodos que hacer."""
         while 1:
-            # Lee línea a línea lo que nos envía el cliente
-            read_line = self.rfile.read()
-            # Si no hay más líneas salimos del bucle infinito
-            if not read_line:
+            # Leo linea a linea lo que recibo del cliente
+            line = self.rfile.read()
+            lines = line.decode('utf-8')
+            # En caso de haber linea en blanco salgo del bucle
+            if not lines:
                 break
-            # Evaluación de los parámetros que nos envía el proxy
-            print("El cliente nos envia: " + read_line.decode('utf-8'))
-            lines = read_line.decode('utf-8')
-            METODO = lines.split(' ')[0]
-
-            if METODO == "REGISTER":
-                print(lines.split())
-
+            print("El cliente nos manda:\r\n" + lines)
+            # Segun el metodo que reciba, envio una cosa diferente
+            lista = lines.split('\r\n')
+            metod = lista[0].split()
+            met = metod[0]
+            # En caso de recibir el metodo REGISTER
+            if met == "REGISTER":
+               nonce = "89898989897898989898989"
+               if len(lines.split()) == 5:
+                       Answer = 'SIP/2.0 401 Unauthorized' + '\r\n'
+                       Answer += ('WWW Authenticate: ' + 'Digest nonce = ' +
+                                  str(nonce) + '\r\n')
+                       self.wfile.write(bytes(Answer, 'utf-8'))
+               elif len(lines.split()) > 5:
+                   Answer = "SIP/2.0 200 OK\r\n"
+                   self.wfile.write(bytes(Answer, 'utf-8'))
+            # En caso de recibir un INVITE
+            elif met == "INVITE":
+                # Nombre a quien envio el INVITE
+                user = lines.split(' ')[1].split(':')[1]
+                if user in self.Dicc:
+                    # Cojo la IP y puerto del servidor del diccionario
+                    IP = self.Dicc[user][1]
+                    Puert = int(self.Dicc[user][2])
+                    # Creo socket, y lo configuro
+                    my_socket = socket.socket(socket.AF_INET,
+                                              socket.SOCK_DGRAM)
+                    my_socket.setsockopt(socket.SOL_SOCKET,
+                                         socket.SO_REUSEADDR, 1)
+                   # Lo ato al servidor
+                    my_socket.connect((IP, int(Puert)))
+                    print('Reenvio INVITE al servidor\r\n' + lines)
+                    my_socket.send(bytes(lines, 'utf-8') + b'\r\n')
+                    data = my_socket.recv(Puert)
+                    dat = data.decode('utf-8')
+                    print('Recibo del servidor...', dat)
+                    self.wfile.write(bytes(dat, 'utf-8') + b'\r\n')
+                    print('Reenvio al cliente...\r\n', dat)
+                    self.wfile.write(bytes(dat, 'utf-8') + b'\r\n')
+            elif met == 'ACK':
+                user = lines.split(' ')[1].split(':')[1]
+                if user in self.Dicc:
+                    # Cojo la IP y puerto del servidor del diccionario
+                    IP = self.Dicc[user][1]
+                    Puert = int(self.Dicc[user][2])
+                    # Creo socket, y lo configuro
+                    my_socket = socket.socket(socket.AF_INET,
+                                              socket.SOCK_DGRAM)
+                    my_socket.setsockopt(socket.SOL_SOCKET,
+                                         socket.SO_REUSEADDR, 1)
+                   # Lo ato al servidor
+                    my_socket.connect((IP, int(Puert)))
+                    my_socket.send(bytes(lines, 'utf-8') + b'\r\n')
+                    inv = my_socket.recv(self.client_address[1])
+                    inv_dat = inv.decode('utf-8')
+                    print('ACK recibido y reenviado a ' + user + '\r\n')
+                    self.wfile.write(bytes(inv_dat, 'utf-8') + b'\r\n')
+            elif met == 'BYE':
+                user = lines.split(' ')[1].split(':')[1]
+                if user in self.Dicc:
+                    # Cojo la IP y puerto del servidor del diccionario
+                    IP = self.Dicc[user][1]
+                    Puert = int(self.Dicc[user][2])
+                    # Creo socket, y lo configuro
+                    my_socket = socket.socket(socket.AF_INET,
+                                              socket.SOCK_DGRAM)
+                    my_socket.setsockopt(socket.SOL_SOCKET,
+                                         socket.SO_REUSEADDR, 1)
+                   # Lo ato al servidor
+                    my_socket.connect((IP, int(Puert)))
+                    my_socket.send(bytes(lines, 'utf-8') + b'\r\n')
+                    bye = my_socket.recv(Puert)
+                    bye_send = bye.decode('utf-8')
+                    print('BYE recibido --', bye_send)
+                    self.wfile.write(bytes(bye_send, 'utf-8') + b'\r\n')
+            elif met not in ['INVITE', 'BYE', 'ACK']:
+                self.wfile.write(b"SIP/2.0 405 Method Not Allowed" +
+                                 b"\r\n")
 
 if __name__ == "__main__":
+    datos = sys.argv
+    if len(datos) == 2:
+        CONFIG = datos[1]
+    else:
+        sys.exit("Usage: python proxy_registrar.py config")
+    # Parseamos y separamos el fichero
+    parser = make_parser()
+    XMLHandler = FicheroXML()
+    parser.setContentHandler(XMLHandler)
 
     try:
-        CONFIG_XML = sys.argv[1]
-    except(IndexError, ValueError):
-        sys.exit('Usage: python3 proxy_registrar.py config')
+        parser.parse(open(CONFIG))
+    except FileNotFoundError or IndexError:
+            sys.exit("  Usage: python3 proxy_registrar.py config")
+    except FileNotFoundError:
+            sys.exit('  File not found!')
+    except KeyboardInterrupt:
+            print("\r\nFinalizado el servidor")
+            sys.exit()
+    # XML a mi dicc
+    list_XML = XMLHandler.get_tags()
+    # extracción de parámetros de XML
+    prox_port = int(list_XML[2])
 
-    # Creamos socket para parsear el XML
-    parser = make_parser()
-    prox_Handler = UA_Proxy()
-    parser.setContentHandler(prox_Handler)
-    parser.parse(open(CONFIG_XML))
-    XML_prox= prox_Handler.get_tags()
-
-    # Damos valores a las variables del XML
-    PROXY_IP = XML_prox[0][1]['ip']  # Es la IP del PROXY
-    PROX_PORT = XML_prox[0][1]['puerto']  # Es el puerto del PROXY
-
-    # Conecto socket al proxy
-    my_socket_prox = socketserver.UDPServer((PROXY_IP, PROX_PORT),
-                                             EchoHandler)
-    print('Server MyServer listening at port 6002... \r\n')
-    my_socket_prox.serve_forever()
+    serv = socketserver.UDPServer(('', int(list_XML[2])),
+                                  SIPRegisterHandler)
+    print("Server", list_XML[0], "listening at port",  list_XML[2] ,
+          "..."+ "\r\n")
+    serv.serve_forever()
