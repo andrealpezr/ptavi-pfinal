@@ -1,11 +1,9 @@
-<?xml version= "1.0" encoding= "UTF-8" ?>
-<!DOCTYPE config [
-    <!ELEMENT config (server, database, log)>
-    <!ELEMENT server EMPTY>
-    <!ATTLIST log path CDATA #REQUIRED>
-]>
+<?xml version="1.0" encoding="UTF-8"?>
 <config>
-    <server name="My_Proxy" ip = "127.0.0.1" puerto="6002"/> 
-    <database path="base_datos.txt" passwdpath = 'esdificil' />
-    <log path="log_prox" />
+  <server   name="SoyProxy"
+            ip="127.0.0.1"
+            puerto="8788"/>
+  <database path="./usuarios.txt"
+            passwdpath="./passwords.txt"/>
+  <log      path="./proxy_log.txt"/>
 </config>
