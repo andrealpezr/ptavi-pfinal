@@ -1,26 +1,12 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE config [
-    <!ELEMENT config (account, uaserver, rtpaudio, regproxy, log, audio)>
-    <!ATTLIST account username CDATA #REQUIRED>
-    <!ATTLIST account passwd CDATA #IMPLIED>
-    <!ELEMENT uaserver EMPTY>
-    <!ATTLIST uaserver ip CDATA #IMPLIED>
-    <!ATTLIST uaserver puerto CDATA #REQUIRED>
-    <!ELEMENT rtpaudio EMPTY>
-    <!ATTLIST rtpaudio puerto CDATA #REQUIRED>
-    <!ELEMENT regproxy EMPTY>
-    <!ATTLIST regproxy ip CDATA #REQUIRED>
-    <!ATTLIST regproxy puerto CDATA #REQUIRED>
-    <!ELEMENT log EMPTY>
-    <!ATTLIST log path CDATA #REQUIRED>
-    <!ELEMENT audio EMPTY>
-    <!ATTLIST audio path CDATA #REQUIRED>
-]>
-<config>
-    <account username="atletico_club@ptavi.es" passwd="notable" />
-    <uaserver ip="127.0.0.3" puerto="6012" />
-    <rtpaudio puerto="23033" />
-    <regproxy ip="127.0.0.1" puerto="6002" />
-    <log path="log_ua2.txt" />
-    <audio path="cancion.mp3" />
-</config>
+<?xml version= "1.0" encoding= "UTF-8" ?>
+	<config>
+		<account  username="mark@marquez.com" 
+			  passwd="motor"/>
+		<uaserver ip="127.0.0.1" 
+			  puerto="8787"/>
+		<rtpaudio puerto="2323"/>
+		<regproxy ip="127.0.0.1" 
+			  puerto="8788"/>
+		<log 	  path="logUa2.txt"/>
+		<audio	  path="cancion.mp3"/>
+	</config>
