@@ -36,27 +36,35 @@ class FicheroXML(ContentHandler):
         """Devuelve el diccionario creado."""
         return self.diccionario
 
-
-def register2json(self):
-    """Creo json file."""
-    with open('registered.json', 'w') as fichero:
-        json.dump(self.clientes, fichero, indent='\t')
-
-def json2register(self):
-    """Abre el fichero Json y nos da el diccionario anterior."""
-    try:
-        with open('registered.json', 'r') as fich:
-            self.clientes = json.load(fich)
-    except(FileNotFoundError or ValueError):
-        self.register2json()
-
+def fich_passwords(user):
+    """Metodo devuelve contrasenas."""
+    with open(PASSW, "r") as fich:
+        psswd = None  # ESTO NO SE SI ESTA BIEN O HAY QUE QUITARLO
+        for line in fich:
+            user_fich = line.split()[1]
+            if user == user_fich:
+                psswd = line.split()[3]
+                break
+        return psswd
 
 class SIPRegisterHandler(socketserver.DatagramRequestHandler):
     """Proxy class."""
-    clientes = []
-    user_add = []
-    port = []
+  
+    dicc_users = {}
+    dicc_contr = {}
 
+    def write_database(self):
+        """Metodo que guarda usuarios en database."""
+        fich = open('passwords.txt', "w")
+        for user in self.dicc_users.keys():
+            reg = 'USUARIOS QUE SE HAN REGISTRADO' + '\r\n'
+            line = (user + ': ' + self.dicc_users[user][0] + ' ' +
+                     self.dicc_users[user][1] + ' ' +
+                     str(self.dicc_users[user][2]) + ' ' + 
+                     str(self.dicc_users[user][3]) + ';')
+            fich.write(line)
+               
+                
     def handle(self):
         """Segun los metodos que hacer."""
         while 1:
@@ -86,49 +94,60 @@ class SIPRegisterHandler(socketserver.DatagramRequestHandler):
             # En caso de recibir un INVITE
             elif met == "INVITE":
                 # Nombre a quien envio el INVITE
-                PORT = lista[1][4:]
-                for clien in self.clientes:
-                    if clien[0] == PORT:
-                        # Cojo la IP y puerto d el servidor del diccionario
-                        IP = clien[1]['address']
-                        Puert = int(clien[1]['port'])
-                        try:
-                            # Creo socket, y lo configuro
-                            my_socket = socket.socket(socket.AF_INET,
-                                                      socket.SOCK_DGRAM)
-                            my_socket.setsockopt(socket.SOL_SOCKET,
-                                                 socket.SO_REUSEADDR, 1)
-                            # Lo ato al servidor
-                            my_socket.connect((IP, int(Puert)))
-                            self.user_add.append(IP)
-                            self.port.append(Puert)
-                            my_socket.send(bytes(lines, 'utf-8'))
-                            data = my_socket.recv(int(Puert))
-                            dat = data.decode('utf-8')
-                            print('Recibo del servidor...', dat)
-                            self.wfile.write(bytes(data.decode('utf-8'), 
-                                                   'utf-8') + b'\r\n')
-                        except ConnectionRefusedError:
-                            envio = ('Error: no server listening at' + IP + 'port'
-                                     + Puert)
-                            print(envio)
-                            self.wfile.write(bytes(envio, 'utf-8') + b'\r\n')
-                    else:
+                nam = lines.split()[1].split(':')[1]
+                if nam in self.dicc_users:
+                    # Cojo la IP y puerto d el servidor del diccionario
+                    IP = self.dicc_users[nam][0]
+                    Puert = int(self.dicc_users[nam][1])
+                    try:
+                        # Creo socket, y lo configuro
+                        my_socket = socket.socket(socket.AF_INET,
+                                                  socket.SOCK_DGRAM)
+                        my_socket.setsockopt(socket.SOL_SOCKET,
+                                             socket.SO_REUSEADDR, 1)
+                        # Lo ato al servidor
+                        my_socket.connect((IP, int(Puert)))
+                        my_socket.send(bytes(lines, 'utf-8') + b'\r\n')
+                        data = my_socket.recv(Puert)
+                        dat = data.decode('utf-8')
+                        print('Recibo del servidor...', dat)
+                        self.wfile.write(bytes((dat), 'utf-8') + b'\r\n')
+                    except ConnectionRefusedError:
+                        envio = ('Error: no server listening at' + IP + 'port'
+                                 + Puert)
+                        print(envio)
+                        self.wfile.write(bytes(envio, 'utf-8') + b'\r\n')
+                else:
                         self.wfile.write(bytes("SIP/2.0 404 User not found",
                                                'utf-8') + b'\r\n\r\n')
             elif met == 'ACK':
-                user = lista[1].split(':')[1]
-                # Cojo la IP y puerto del servidor del diccionario
-                IP = self.Dicc[user][0]
-                Puert = int(self.clientes[user][1])
-                # Creo socket, y lo configuro
-                my_socket = socket.socket(socket.AF_INET,
-                                          socket.SOCK_DGRAM)
-                my_socket.setsockopt(socket.SOL_SOCKET,
-                                     socket.SO_REUSEADDR, 1)
-                # Lo ato al servidor
-                my_socket.connect((IP, int(Puert)))
-                my_socket.send(bytes(lines, 'utf-8') + b'\r\n')
+                # Nombre a quien envio el ACK
+                nam = lines.split(' ')[1].split(':')[1]
+                if nam in self.dicc_users:
+                    # Cojo la IP y puerto d el servidor del diccionario
+                    IP = self.dicc_users[nam][1]
+                    Puert = int(self.dicc_users[nam][2])
+                    try:
+                        # Creo socket, y lo configuro
+                        my_socket = socket.socket(socket.AF_INET,
+                                                  socket.SOCK_DGRAM)
+                        my_socket.setsockopt(socket.SOL_SOCKET,
+                                             socket.SO_REUSEADDR, 1)
+                        # Lo ato al servidor
+                        my_socket.connect((IP, int(Puert)))
+                        my_socket.send(bytes(lines, 'utf-8') + b'\r\n')
+                        data = my_socket.recv(self.client_address[1])
+                        dat = data.decode('utf-8')
+                        print('Recibo del servidor...', dat)
+                        self.wfile.write(bytes((dat), 'utf-8') + b'\r\n')
+                    except ConnectionRefusedError:
+                        envio = ('Error: no server listening at' + IP + 'port'
+                                 + Puert)
+                        print(envio)
+                        self.wfile.write(bytes(envio, 'utf-8') + b'\r\n')
+                else:
+                        self.wfile.write(bytes("SIP/2.0 404 User not found",
+                                               'utf-8') + b'\r\n\r\n')
             elif met == 'BYE':
                 user = lista[1].split(':')[1]
                 # Cojo la IP y puerto del servidor del diccionario
@@ -151,7 +170,7 @@ class SIPRegisterHandler(socketserver.DatagramRequestHandler):
             else:
                 self.wfile.write(b"SIP/2.0 400 Bad Request" + b"\r\n" +
                                  b"\r\n")
-        
+            self.write_database()
 
 if __name__ == "__main__":
     # Argumentos y errores
