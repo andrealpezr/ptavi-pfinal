@@ -1,0 +1,100 @@
+20190701012621  Enviando a 127.0.0.1:8788: REGISTER sip:mark@marquez.com:8787 SIP/2.0
+Expires: 3600
+
+
+20190701012621  Recibo de 127.0.0.1:8788: REGISTER sip:mark@marquez.com:8787 SIP/2.0
+Expires: 3600
+
+
+20190701012621  Envio a 127.0.0.1:8788: REGISTER sip:mark@marquez.com:8787 SIP/2.0
+Expires: 3600
+
+20190701012621  Recibo de 127.0.0.1:8788: REGISTER sip:mark@marquez.com:8787 SIP/2.0
+Expires: 3600
+
+20190701012634  Enviando a 127.0.0.1:8788: INVITE sip:andrea@bestel.com SIP/2.0
+Content-Type: application/sdp
+
+v=0
+o=mark@marquez.com 127.0.0.1
+s=lasesion
+t=0
+m=audio 23022 RTP
+
+
+20190701012634  Recibo de 127.0.0.1:8788: INVITE sip:andrea@bestel.com SIP/2.0
+Content-Type: application/sdp
+
+v=0
+o=mark@marquez.com 127.0.0.1
+s=lasesion
+t=0
+m=audio 23022 RTP
+
+
+20190701012634  Envio a 127.0.0.1:8788: ACK sip:andrea@bestel.com SIP/2.0
+
+
+20190701012649  Recibo de 127.0.0.1:8788: BYE sip:andrea@bestel.com SIP/2.0
+
+
+20190701012849  Enviando a 127.0.0.1:8788: INVITE sip:andrea@bestel.com SIP/2.0
+Content-Type: application/sdp
+
+v=0
+o=mark@marquez.com 127.0.0.1
+s=lasesion
+t=0
+m=audio 23022 RTP
+
+
+20190701012849  Recibo de 127.0.0.1:8788: INVITE sip:andrea@bestel.com SIP/2.0
+Content-Type: application/sdp
+
+v=0
+o=mark@marquez.com 127.0.0.1
+s=lasesion
+t=0
+m=audio 23022 RTP
+
+
+20190701014058  Enviando a 127.0.0.1:8788: REGISTER sip:mark@marquez.com:8787 SIP/2.0
+Expires: 3600
+
+
+20190701014058  Recibo de 127.0.0.1:8788: REGISTER sip:mark@marquez.com:8787 SIP/2.0
+Expires: 3600
+
+
+20190701014058  Envio a 127.0.0.1:8788: REGISTER sip:mark@marquez.com:8787 SIP/2.0
+Expires: 3600
+
+20190701014058  Recibo de 127.0.0.1:8788: REGISTER sip:mark@marquez.com:8787 SIP/2.0
+Expires: 3600
+
+20190701014105  Enviando a 127.0.0.1:8788: INVITE sip:andrea@bestel.com SIP/2.0
+Content-Type: application/sdp
+
+v=0
+o=mark@marquez.com 127.0.0.1
+s=lasesion
+t=0
+m=audio 23022 RTP
+
+
+20190701014105  Recibo de 127.0.0.1:8788: INVITE sip:andrea@bestel.com SIP/2.0
+Content-Type: application/sdp
+
+v=0
+o=mark@marquez.com 127.0.0.1
+s=lasesion
+t=0
+m=audio 23022 RTP
+
+
+20190701014105  Envio a 127.0.0.1:8788: ACK sip:andrea@bestel.com SIP/2.0
+
+
+20190701014122  Recibo de 127.0.0.1:8788: BYE sip:andrea@bestel.com SIP/2.0
+
+
