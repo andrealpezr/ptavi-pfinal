@@ -1,0 +1,113 @@
+20190701012613  Recibo de 127.0.0.1:42530:REGISTER sip:andrea@bestel.com:8789 SIP/2.0
+Expires: 3600
+
+
+20190701012613  Recibo de 127.0.0.1:42530:REGISTER sip:andrea@bestel.com:8789 SIP/2.0
+Expires: 3600
+Authorization: Digest response = 1231231231212312123123123
+
+
+
+20190701012621  Recibo de 127.0.0.1:48839:REGISTER sip:mark@marquez.com:8787 SIP/2.0
+Expires: 3600
+
+
+20190701012621  Recibo de 127.0.0.1:48839:REGISTER sip:mark@marquez.com:8787 SIP/2.0
+Expires: 3600
+Authorization: Digest response = 1231231231212312123123123
+
+
+
+20190701012634  Recibo de 127.0.0.1:42798:INVITE sip:andrea@bestel.com SIP/2.0
+Content-Type: application/sdp
+
+v=0
+o=mark@marquez.com 127.0.0.1
+s=lasesion
+t=0
+m=audio 23022 RTP
+
+
+20190701012634  Recibo de 127.0.0.1:42798:ACK sip:andrea@bestel.com SIP/2.0
+
+
+20190701012649  Recibo de 127.0.0.1:49115:BYE sip:andrea@bestel.com SIP/2.0
+
+
+20190701012845  Recibo de 127.0.0.1:47499:REGISTER sip:andrea@bestel.com:8789 SIP/2.0
+Expires: 3600
+
+
+20190701012845  Recibo de 127.0.0.1:47499:REGISTER sip:andrea@bestel.com:8789 SIP/2.0
+Expires: 3600
+Authorization: Digest response = 1231231231212312123123123
+
+
+
+20190701012849  Recibo de 127.0.0.1:44269:INVITE sip:andrea@bestel.com SIP/2.0
+Content-Type: application/sdp
+
+v=0
+o=mark@marquez.com 127.0.0.1
+s=lasesion
+t=0
+m=audio 23022 RTP
+
+
+20190701012902  Recibo de 127.0.0.1:35692:REGISTER sip:andrea@bestel.com:8789 SIP/2.0
+Expires: 3600
+
+
+20190701012902  Recibo de 127.0.0.1:35692:REGISTER sip:andrea@bestel.com:8789 SIP/2.0
+Expires: 3600
+Authorization: Digest response = 1231231231212312123123123
+
+
+
+20190701012915  Recibo de 127.0.0.1:52684:INVITE sip:mark@marquez.com SIP/2.0
+Content-Type: application/sdp
+
+v=0
+o=andrea@bestel.com 127.0.0.1
+s=lasesion
+t=0
+m=audio 23023 RTP
+
+
+20190701012915  Envio a 127.0.0.1:52684:SIP/2.0 404 User not found
+20190701014054  Recibo de 127.0.0.1:49583:REGISTER sip:andrea@bestel.com:8789 SIP/2.0
+Expires: 3600
+
+
+20190701014054  Recibo de 127.0.0.1:49583:REGISTER sip:andrea@bestel.com:8789 SIP/2.0
+Expires: 3600
+Authorization: Digest response = 1231231231212312123123123
+
+
+
+20190701014058  Recibo de 127.0.0.1:55066:REGISTER sip:mark@marquez.com:8787 SIP/2.0
+Expires: 3600
+
+
+20190701014058  Recibo de 127.0.0.1:55066:REGISTER sip:mark@marquez.com:8787 SIP/2.0
+Expires: 3600
+Authorization: Digest response = 1231231231212312123123123
+
+
+
+20190701014105  Recibo de 127.0.0.1:60629:INVITE sip:andrea@bestel.com SIP/2.0
+Content-Type: application/sdp
+
+v=0
+o=mark@marquez.com 127.0.0.1
+s=lasesion
+t=0
+m=audio 23022 RTP
+
+
+20190701014105  Recibo de 127.0.0.1:60629:ACK sip:andrea@bestel.com SIP/2.0
+
+
+20190701014122  Recibo de 127.0.0.1:51584:BYE sip:andrea@bestel.com SIP/2.0
+
+
