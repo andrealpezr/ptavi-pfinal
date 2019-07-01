@@ -49,7 +49,7 @@ class SIPRegisterHandler(socketserver.DatagramRequestHandler):
 
     def write_database(self):
         """Metodo que guarda usuarios en database."""
-        fich = open('passwords', "w")
+        fich = open('registro', "w")
         for user in self.dicc_users.keys():
             fich.write('USUARIOS QUE SE HAN REGISTRADO:' + '\r\n')
             line = (self.dicc_users[user][0] + ' ' +
